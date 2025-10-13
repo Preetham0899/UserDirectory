@@ -11,9 +11,9 @@ import {
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUsers, deleteUser } from '../redux/userSlice';
-import { logoutUser } from '../services/authService'; // ✅ import logout
+import { logoutUser } from '../services/authService'; //  import logout
 
-// ✅ Memoized row for performance
+//  Memoized row for performance
 const UserRow = memo(({ user, onPress, onDelete }) => {
   return (
     <View style={styles.itemContainer}>
@@ -34,12 +34,12 @@ const UserListScreen = ({ navigation }) => {
   const { data, loading, page, hasMore } = useSelector((state) => state.users);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // ✅ Fetch first page of users when component mounts
+  // Fetch first page of users when component mounts
   useEffect(() => {
     dispatch(fetchUsers(1));
   }, [dispatch]);
 
-  // ✅ Delete user handler
+  // Delete user handler
   const handleDelete = useCallback(
     (id) => {
       Alert.alert('Confirm Delete', 'Are you sure you want to delete this user?', [
@@ -50,30 +50,30 @@ const UserListScreen = ({ navigation }) => {
     [dispatch]
   );
 
-  // ✅ Navigate to user detail screen
+  // Navigate to user detail screen
   const handleUserPress = useCallback(
     (user) => navigation.navigate('UserDetail', { user }),
     [navigation]
   );
 
-  // ✅ Pull-to-refresh
+  // Pull-to-refresh
   const handleRefresh = useCallback(() => {
     dispatch(fetchUsers(1));
   }, [dispatch]);
 
-  // ✅ Load next page
+  // Load next page
   const handleLoadMore = useCallback(() => {
     if (!loading && hasMore) {
       dispatch(fetchUsers(page + 1));
     }
   }, [loading, hasMore, dispatch, page]);
 
-  // ✅ Search handler
+  // Search handler
   const handleSearchChange = useCallback((text) => {
     setSearchQuery(text);
   }, []);
 
-  // ✅ Filter users by name/email
+  // Filter users by name/email
   const filteredData = useMemo(() => {
     if (!searchQuery.trim()) return data;
     return data.filter(
@@ -83,7 +83,7 @@ const UserListScreen = ({ navigation }) => {
     );
   }, [data, searchQuery]);
 
-  // ✅ Logout handler
+  // Logout handler
   const handleLogout = async () => {
     try {
       await logoutUser();
@@ -93,13 +93,13 @@ const UserListScreen = ({ navigation }) => {
     }
   };
 
-  // ✅ Render each row
+  // Render each row
   const renderItem = useCallback(
     ({ item }) => <UserRow user={item} onPress={handleUserPress} onDelete={handleDelete} />,
     [handleUserPress, handleDelete]
   );
 
-  // ✅ Footer loading spinner
+  // Footer loading spinner
   const renderFooter = () =>
     loading ? (
       <View style={styles.footer}>
@@ -109,7 +109,7 @@ const UserListScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* 🔎 Search input */}
+      
       <TextInput
         style={styles.searchInput}
         placeholder="Search by name or email..."
@@ -117,7 +117,7 @@ const UserListScreen = ({ navigation }) => {
         onChangeText={handleSearchChange}
       />
 
-      {/* 📭 Empty state */}
+      
       {filteredData.length === 0 && !loading ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>No users found</Text>
@@ -139,7 +139,7 @@ const UserListScreen = ({ navigation }) => {
         />
       )}
 
-      {/* ➕ Add user button */}
+      
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => navigation.navigate('AddUser')}
@@ -147,7 +147,7 @@ const UserListScreen = ({ navigation }) => {
         <Text style={styles.addButtonText}>Add User</Text>
       </TouchableOpacity>
 
-      {/* 🔐 Logout button */}
+      
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
