@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "549777638425",
+    "project_id": "userdirectoryapp-42a65",
+    "storage_bucket": "userdirectoryapp-42a65.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:549777638425:android:b49bbef6b2b153c26b1688",
+        "android_client_info": {
+          "package_name": "com.userdirectoryapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsZr5-69LNsVY8ZO1VnS5V1Wn_WM3MyqM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

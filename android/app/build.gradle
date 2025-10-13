@@ -1,0 +1,106 @@
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("com.facebook.react")
+    id("com.google.gms.google-services") // ✅ Required for Firebase
+}
+
+import com.android.build.OutputFile
+
+// Enables Proguard for release builds (optional)
+def enableProguardInReleaseBuilds = false
+
+// JSC flavor for JavaScriptCore (if Hermes is disabled)
+def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
+
+android {
+    namespace "com.userdirectoryapp"
+    ndkVersion rootProject.ext.ndkVersion
+    compileSdk rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        applicationId "com.userdirectoryapp"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+
+        // Required if using Firebase Auth with phone
+        multiDexEnabled true
+    }
+
+    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+        release {
+            signingConfig signingConfigs.debug
+            minifyEnabled enableProguardInReleaseBuilds
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+    }
+
+    // Optional - If you want to split APKs per architecture
+    splits {
+        abi {
+            reset()
+            enable true
+            universalApk false  // If true, also generate a universal APK
+            include "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
+        }
+    }
+
+    packagingOptions {
+        pickFirst '**/*.so'
+        pickFirst '**/*.jar'
+        pickFirst '**/*.dex'
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+}
+
+dependencies {
+    // ✅ React Native core
+    implementation("com.facebook.react:react-android")
+
+    // ✅ Hermes or JSC
+    if (hermesEnabled.toBoolean()) {
+        implementation("com.facebook.react:hermes-android")
+    } else {
+        implementation jscFlavor
+    }
+
+    // ✅ Firebase BoM (ensures all Firebase libs use same version)
+    implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
+
+    // ✅ Firebase Auth & Analytics
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-analytics")
+
+    // Optional: Firestore / Database (uncomment if needed)
+    // implementation("com.google.firebase:firebase-firestore")
+    // implementation("com.google.firebase:firebase-database")
+
+    // Optional: For push notifications
+    // implementation("com.google.firebase:firebase-messaging")
+
+    // Kotlin stdlib (required)
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:${rootProject.ext.kotlinVersion}"
+}
+
+// Automatically link all RN libraries
+react {
+    autolinkLibrariesWithApp()
+}
