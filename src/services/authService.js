@@ -1,4 +1,10 @@
 import auth from '@react-native-firebase/auth';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+
+
+GoogleSignin.configure({
+  webClientId: '549777638425-ssbo7p1oo5bhaevnfvutnl8pnl7dqptp.apps.googleusercontent.com',
+});
 
 export const registerUser = async (email, password) => {
   try {
@@ -42,3 +48,24 @@ export const onAuthStateChangedListener = (callback) => {
     throw error;
   }
 };
+
+export const signInWithGoogle = async () => {
+  try {
+    // Ensure Play Services are available
+    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+
+    // Sign in and get the user's ID token
+    const { idToken } = await GoogleSignin.signIn();
+
+    // Create a Firebase credential with the token
+    const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+
+    // Sign in with credential
+    return await auth().signInWithCredential(googleCredential);
+  } catch (error) {
+    console.error('Google Sign-In Error:', error);
+    throw error;
+  }
+};
+
+

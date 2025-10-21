@@ -10,6 +10,7 @@ import {
   TextInput,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import firestore from '@react-native-firebase/firestore';
 import { fetchUsers, deleteUser } from '../redux/userSlice';
 import { logoutUser } from '../services/authService'; //  import logout
 
@@ -33,11 +34,34 @@ const UserListScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const { data, loading, page, hasMore } = useSelector((state) => state.users);
   const [searchQuery, setSearchQuery] = useState('');
+  const [realtimeUsers, setRealtimeUsers] = useState([]); //firebase realtime database
 
   // Fetch first page of users when component mounts
   useEffect(() => {
     dispatch(fetchUsers(1));
   }, [dispatch]);
+  // firebase realtime database
+  useEffect(() => {
+    const unsubscribe = firestore()
+      .collection('users')
+      .orderBy('createdAt', 'desc')
+      .onSnapshot((snapshot) => {
+        const users = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setRealtimeUsers(users);
+      });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Merge API and realtime database users
+const allUsers = useMemo(() => {
+  const apiUsers = data || [];
+  return [...apiUsers, ...realtimeUsers];
+}, [data, realtimeUsers]);
+
 
   // Delete user handler
   const handleDelete = useCallback(
@@ -75,19 +99,18 @@ const UserListScreen = ({ navigation }) => {
 
   // Filter users by name/email
   const filteredData = useMemo(() => {
-    if (!searchQuery.trim()) return data;
-    return data.filter(
-      (user) =>
-        user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.email?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [data, searchQuery]);
-
+  if (!searchQuery.trim()) return allUsers;
+  return allUsers.filter(
+    (user) =>
+      user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+}, [allUsers, searchQuery]);
   // Logout handler
   const handleLogout = async () => {
     try {
       await logoutUser();
-      navigation.replace('Login'); // 👈 navigate back to login screen
+      navigation.replace('Login'); //  navigate back to login screen
     } catch (error) {
       Alert.alert('Logout Error', error.message);
     }

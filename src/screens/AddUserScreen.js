@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { addUser } from '../redux/userSlice';
+import firestore from '@react-native-firebase/firestore';
 
 const AddUserScreen = ({ navigation }) => {
   const [name, setName] = useState('');
@@ -17,24 +18,26 @@ const AddUserScreen = ({ navigation }) => {
   const [phone, setPhone] = useState('');
   const dispatch = useDispatch();
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!name || !email) {
       Alert.alert('Error', 'Please fill in all required fields.');
       return;
     }
 
-    const newUser = { name, email, phone };
+    const newUser = {
+      name,
+      email,
+      phone,
+      createdAt: firestore.FieldValue.serverTimestamp(), //  for ordering
+    };
 
-    //  Dispatch Redux action
-    dispatch(addUser(newUser))
-      .unwrap()
-      .then(() => {
-        Alert.alert('Success', 'User added successfully!');
-        navigation.navigate('UserList'); // go back only after success
-      })
-      .catch((err) => {
-        Alert.alert('Error', err.message);
-      });
+    try {
+      await firestore().collection('users').add(newUser); //  save to Firestore
+      Alert.alert('Success', 'User added successfully!');
+      navigation.navigate('UserList'); //  Go back to list
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    }
   };
 
   return (
